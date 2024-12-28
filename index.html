@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+  <title>Mise à jour de contact</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container mt-5">
+    <h3 class="text-center">Mise à jour de contact (.vcf)</h3>
+    <form id="updateForm">
+      <div class="mb-3">
+        <label for="file" class="form-label">Sélectionner le fichier (.vcf)</label>
+        <input type="file" id="file" class="form-control" accept=".vcf" required>
+      </div>
+      <button type="submit" class="btn btn-success">Mise à jour</button>
+    </form>
+  </div>
+
+  <script>
+    // Normaliser un numéro de téléphone
+    function normalizeNumber(number) {
+      // Nettoyer le numéro
+      let cleanNumber = number.replace(/\D/g, '');
+
+      // Vérifier si le numéro commence par 229 ou +229
+      if (cleanNumber.startsWith('229')) {
+        cleanNumber = cleanNumber.slice(3);
+      }
+
+      // Ajouter le préfixe 01 s'il manque
+      if (!cleanNumber.startsWith('01')) {
+        cleanNumber = '01' + cleanNumber;
+      }
+
+      // Ajouter le préfixe international +229
+      return '+229 ' + cleanNumber;
+    }
+
+    // Traiter le fichier VCF
+    function processVcf(content) {
+      const lines = content.split('\n');
+      const output = lines.map(line => {
+        if (line.startsWith('TEL')) {
+          const match = line.match(/TEL.*:(.+)/);
+          if (match) {
+            const originalNumber = match[1].trim();
+            const normalizedNumber = normalizeNumber(originalNumber);
+            return line.replace(originalNumber, normalizedNumber);
+          }
+        }
+        return line;
+      });
+
+      return output.join('\n');
+    }
+
+    // Gérer le formulaire
+    document.getElementById('updateForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const fileInput = document.getElementById('file');
+      if (!fileInput.files.length) {
+        Swal.fire('Erreur', 'Veuillez sélectionner un fichier .vcf', 'error');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function () {
+        const content = reader.result;
+
+        // Traiter le contenu du fichier
+        const updatedContent = processVcf(content);
+
+        // Créer un fichier téléchargable
+        const blob = new Blob([updatedContent], { type: 'text/vcard' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'miseajour_' + file.name;
+        link.click();
+
+        Swal.fire('Succès', 'Le fichier a été mis à jour avec succès !', 'success');
+      };
+
+      reader.onerror = function () {
+        Swal.fire('Erreur', 'Impossible de lire le fichier.', 'error');
+      };
+
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>
