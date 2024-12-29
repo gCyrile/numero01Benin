@@ -68,7 +68,7 @@
 
     <!-- Footer Section -->
     <footer>
-      <p>Proposé par <a href="">Cyrille Mahougnon</a> &copy; 2024</p>
+      <p>Proposé par <a href="">Cyrille Mahougnon G</a> &copy; 2024</p>
     </footer>
 
     <script>
@@ -77,12 +77,11 @@
         // Nettoyer le numéro en supprimant tous les caractères non numériques
         let cleanNumber = number.replace(/\D/g, "");
 
-        // Vérification stricte : seulement les numéros béninois à traiter
-        // Si le numéro commence par +229, 229 ou contient exactement 8 chiffres, on le normalise
+        // Vérification : si le numéro commence par +229, 229 ou est composé de 8 chiffres
         if (
-          cleanNumber.startsWith("229") || // Si le numéro commence par "229"
-          cleanNumber.startsWith("+229") || // Si le numéro commence par "+229"
-          cleanNumber.length === 8 // Si le numéro contient exactement 8 chiffres
+          cleanNumber.startsWith("229") ||
+          cleanNumber.startsWith("+229") ||
+          cleanNumber.length === 8
         ) {
           // Si le numéro commence par +229 ou 229, on garde uniquement les 8 derniers chiffres
           if (cleanNumber.startsWith("+229")) {
@@ -100,7 +99,7 @@
           return "+229 " + cleanNumber;
         }
 
-        // Si le numéro ne correspond pas aux critères béninois, le retourner tel quel
+        // Si le numéro ne correspond pas aux critères béninois, on le retourne tel quel
         return number;
       }
 
@@ -108,6 +107,7 @@
       function processVcf(content) {
         const lines = content.split("\n");
         const output = lines.map((line) => {
+          // Traiter uniquement les lignes qui contiennent un numéro de téléphone (commencent par "TEL")
           if (line.startsWith("TEL")) {
             const match = line.match(/TEL.*:(.+)/);
             if (match) {
