@@ -2,25 +2,52 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
     <title>Mise à jour de contact</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/css/bootstrap.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      /* Ajouter un style pour garder le footer en bas */
+      body, html {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .container {
+        flex: 1;
+      }
+
+      footer {
+        background-color: #f8f9fa;
+        text-align: center;
+        padding: 20px 0;
+        margin-top: auto;
+        font-size: 14px;
+        color: #6c757d;
+      }
+
+      footer a {
+        text-decoration: none;
+        color: #007bff;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
+
   <body>
     <div class="container mt-5">
       <h3 class="text-center">Mise à jour de contact (.vcf)</h3>
       <form id="updateForm">
         <div class="mb-3">
-          <label for="file" class="form-label"
-            >Sélectionner le fichier (.vcf)</label
-          >
+          <label for="file" class="form-label">Sélectionner le fichier (.vcf)</label>
           <input
             type="file"
             id="file"
@@ -32,6 +59,11 @@
         <button type="submit" class="btn btn-success">Mise à jour</button>
       </form>
     </div>
+
+    <!-- Footer Section -->
+    <footer>
+      <p>Proposé par <a href="https://github.com/cyrillegav">Cyrille GAVOEDO</a> &copy; 2024</p>
+    </footer>
 
     <script>
       // Normaliser un numéro de téléphone
@@ -132,3 +164,4 @@
     </script>
   </body>
 </html>
+
