@@ -68,7 +68,7 @@
 
     <!-- Footer Section -->
     <footer>
-      <p>Proposé par <a href="">Cyrille M. GAVOEDO</a> &copy; 2024</p>
+      <p>Proposé par <a href="">Cyrille Mahougnon</a> &copy; 2024</p>
     </footer>
 
     <script>
@@ -77,9 +77,8 @@
         // Nettoyer le numéro en supprimant tous les caractères non numériques
         let cleanNumber = number.replace(/\D/g, "");
 
-        // Vérifier si le numéro est béninois
-        // 1. Commence par 229 ou +229
-        // 2. Ou si le numéro est composé de 8 chiffres
+        // Vérification stricte : seulement les numéros béninois à traiter
+        // Si le numéro commence par +229, 229 ou contient exactement 8 chiffres, on le normalise
         if (
           cleanNumber.startsWith("229") || // Si le numéro commence par "229"
           cleanNumber.startsWith("+229") || // Si le numéro commence par "+229"
