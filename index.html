@@ -19,15 +19,19 @@
     </form>
   </div>
 
-  <script>
-    // Normaliser un numéro de téléphone
-    function normalizeNumber(number) {
-      // Nettoyer le numéro
-      let cleanNumber = number.replace(/\D/g, '');
+<script>
+  // Normaliser un numéro de téléphone
+  function normalizeNumber(number) {
+    // Nettoyer le numéro en supprimant tous les caractères non numériques
+    let cleanNumber = number.replace(/\D/g, '');
 
-      // Vérifier si le numéro commence par 229 ou +229
-      if (cleanNumber.startsWith('229')) {
-        cleanNumber = cleanNumber.slice(3);
+    // Vérifier si le numéro est un numéro béninois (commence par +229, 229 ou un numéro de 8 chiffres)
+    if (cleanNumber.startsWith('229') || cleanNumber.startsWith('+229')) {
+      // Si le numéro commence par +229 ou 229, on garde uniquement les 8 derniers chiffres
+      if (cleanNumber.startsWith('+229')) {
+        cleanNumber = cleanNumber.slice(4); // Retirer le +229
+      } else if (cleanNumber.startsWith('229')) {
+        cleanNumber = cleanNumber.slice(3); // Retirer le 229
       }
 
       // Ajouter le préfixe 01 s'il manque
@@ -38,61 +42,65 @@
       // Ajouter le préfixe international +229
       return '+229 ' + cleanNumber;
     }
+    
+    // Si le numéro n'est pas béninois, retourner le numéro tel quel
+    return number;
+  }
 
-    // Traiter le fichier VCF
-    function processVcf(content) {
-      const lines = content.split('\n');
-      const output = lines.map(line => {
-        if (line.startsWith('TEL')) {
-          const match = line.match(/TEL.*:(.+)/);
-          if (match) {
-            const originalNumber = match[1].trim();
-            const normalizedNumber = normalizeNumber(originalNumber);
-            return line.replace(originalNumber, normalizedNumber);
-          }
+  // Traiter le fichier VCF
+  function processVcf(content) {
+    const lines = content.split('\n');
+    const output = lines.map(line => {
+      if (line.startsWith('TEL')) {
+        const match = line.match(/TEL.*:(.+)/);
+        if (match) {
+          const originalNumber = match[1].trim();
+          const normalizedNumber = normalizeNumber(originalNumber);
+          return line.replace(originalNumber, normalizedNumber);
         }
-        return line;
-      });
+      }
+      return line;
+    });
 
-      return output.join('\n');
+    return output.join('\n');
+  }
+
+  // Gérer le formulaire
+  document.getElementById('updateForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const fileInput = document.getElementById('file');
+    if (!fileInput.files.length) {
+      Swal.fire('Erreur', 'Veuillez sélectionner un fichier .vcf', 'error');
+      return;
     }
 
-    // Gérer le formulaire
-    document.getElementById('updateForm').addEventListener('submit', function (e) {
-      e.preventDefault();
+    const file = fileInput.files[0];
+    const reader = new FileReader();
 
-      const fileInput = document.getElementById('file');
-      if (!fileInput.files.length) {
-        Swal.fire('Erreur', 'Veuillez sélectionner un fichier .vcf', 'error');
-        return;
-      }
+    reader.onload = function () {
+      const content = reader.result;
 
-      const file = fileInput.files[0];
-      const reader = new FileReader();
+      // Traiter le contenu du fichier
+      const updatedContent = processVcf(content);
 
-      reader.onload = function () {
-        const content = reader.result;
+      // Créer un fichier téléchargeable
+      const blob = new Blob([updatedContent], { type: 'text/vcard' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'miseajour_' + file.name;
+      link.click();
 
-        // Traiter le contenu du fichier
-        const updatedContent = processVcf(content);
+      Swal.fire('Succès', 'Le fichier a été mis à jour avec succès !', 'success');
+    };
 
-        // Créer un fichier téléchargable
-        const blob = new Blob([updatedContent], { type: 'text/vcard' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'miseajour_' + file.name;
-        link.click();
+    reader.onerror = function () {
+      Swal.fire('Erreur', 'Impossible de lire le fichier.', 'error');
+    };
 
-        Swal.fire('Succès', 'Le fichier a été mis à jour avec succès !', 'success');
-      };
-
-      reader.onerror = function () {
-        Swal.fire('Erreur', 'Impossible de lire le fichier.', 'error');
-      };
-
-      reader.readAsText(file);
-    });
-  </script>
+    reader.readAsText(file);
+  });
+</script>
 </body>
 </html>
