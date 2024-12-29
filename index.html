@@ -1,106 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-  <title>Mise à jour de contact</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/css/bootstrap.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body>
-  <div class="container mt-5">
-    <h3 class="text-center">Mise à jour de contact (.vcf)</h3>
-    <form id="updateForm">
-      <div class="mb-3">
-        <label for="file" class="form-label">Sélectionner le fichier (.vcf)</label>
-        <input type="file" id="file" class="form-control" accept=".vcf" required>
-      </div>
-      <button type="submit" class="btn btn-success">Mise à jour</button>
-    </form>
-  </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=0"
+    />
+    <title>Mise à jour de contact</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h3 class="text-center">Mise à jour de contact (.vcf)</h3>
+      <form id="updateForm">
+        <div class="mb-3">
+          <label for="file" class="form-label"
+            >Sélectionner le fichier (.vcf)</label
+          >
+          <input
+            type="file"
+            id="file"
+            class="form-control"
+            accept=".vcf"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-success">Mise à jour</button>
+      </form>
+    </div>
 
-<script>
-  // Normaliser un numéro de téléphone
-  function normalizeNumber(number) {
-    // Nettoyer le numéro en supprimant tous les caractères non numériques
-    let cleanNumber = number.replace(/\D/g, '');
+    <script>
+      // Normaliser un numéro de téléphone
+      function normalizeNumber(number) {
+        // Nettoyer le numéro en supprimant tous les caractères non numériques
+        let cleanNumber = number.replace(/\D/g, "");
 
-    // Vérifier si le numéro est un numéro béninois (commence par +229, 229 ou un numéro de 8 chiffres)
-    if (cleanNumber.startsWith('229') || cleanNumber.startsWith('+229')) {
-      // Si le numéro commence par +229 ou 229, on garde uniquement les 8 derniers chiffres
-      if (cleanNumber.startsWith('+229')) {
-        cleanNumber = cleanNumber.slice(4); // Retirer le +229
-      } else if (cleanNumber.startsWith('229')) {
-        cleanNumber = cleanNumber.slice(3); // Retirer le 229
-      }
+        // Vérifier si le numéro commence par +229 ou 229, ou si c'est un numéro à 8 chiffres
+        if (
+          cleanNumber.startsWith("229") ||
+          cleanNumber.startsWith("+229") ||
+          cleanNumber.length === 8
+        ) {
+          // Si le numéro commence par +229 ou 229, on garde uniquement les 8 derniers chiffres
+          if (cleanNumber.startsWith("+229")) {
+            cleanNumber = cleanNumber.slice(4); // Retirer le +229
+          } else if (cleanNumber.startsWith("229")) {
+            cleanNumber = cleanNumber.slice(3); // Retirer le 229
+          }
 
-      // Ajouter le préfixe 01 s'il manque
-      if (!cleanNumber.startsWith('01')) {
-        cleanNumber = '01' + cleanNumber;
-      }
+          // Ajouter le préfixe 01 s'il manque
+          if (!cleanNumber.startsWith("01")) {
+            cleanNumber = "01" + cleanNumber;
+          }
 
-      // Ajouter le préfixe international +229
-      return '+229 ' + cleanNumber;
-    }
-    
-    // Si le numéro n'est pas béninois, retourner le numéro tel quel
-    return number;
-  }
-
-  // Traiter le fichier VCF
-  function processVcf(content) {
-    const lines = content.split('\n');
-    const output = lines.map(line => {
-      if (line.startsWith('TEL')) {
-        const match = line.match(/TEL.*:(.+)/);
-        if (match) {
-          const originalNumber = match[1].trim();
-          const normalizedNumber = normalizeNumber(originalNumber);
-          return line.replace(originalNumber, normalizedNumber);
+          // Ajouter le préfixe international +229
+          return "+229 " + cleanNumber;
         }
+
+        // Si le numéro ne répond pas aux critères, le retourner tel quel
+        return number;
       }
-      return line;
-    });
 
-    return output.join('\n');
-  }
+      // Traiter le fichier VCF
+      function processVcf(content) {
+        const lines = content.split("\n");
+        const output = lines.map((line) => {
+          if (line.startsWith("TEL")) {
+            const match = line.match(/TEL.*:(.+)/);
+            if (match) {
+              const originalNumber = match[1].trim();
+              const normalizedNumber = normalizeNumber(originalNumber);
+              return line.replace(originalNumber, normalizedNumber);
+            }
+          }
+          return line;
+        });
 
-  // Gérer le formulaire
-  document.getElementById('updateForm').addEventListener('submit', function (e) {
-    e.preventDefault();
+        return output.join("\n");
+      }
 
-    const fileInput = document.getElementById('file');
-    if (!fileInput.files.length) {
-      Swal.fire('Erreur', 'Veuillez sélectionner un fichier .vcf', 'error');
-      return;
-    }
+      // Gérer le formulaire
+      document
+        .getElementById("updateForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
 
-    const file = fileInput.files[0];
-    const reader = new FileReader();
+          const fileInput = document.getElementById("file");
+          if (!fileInput.files.length) {
+            Swal.fire(
+              "Erreur",
+              "Veuillez sélectionner un fichier .vcf",
+              "error"
+            );
+            return;
+          }
 
-    reader.onload = function () {
-      const content = reader.result;
+          const file = fileInput.files[0];
+          const reader = new FileReader();
 
-      // Traiter le contenu du fichier
-      const updatedContent = processVcf(content);
+          reader.onload = function () {
+            const content = reader.result;
 
-      // Créer un fichier téléchargeable
-      const blob = new Blob([updatedContent], { type: 'text/vcard' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'miseajour_' + file.name;
-      link.click();
+            // Traiter le contenu du fichier
+            const updatedContent = processVcf(content);
 
-      Swal.fire('Succès', 'Le fichier a été mis à jour avec succès !', 'success');
-    };
+            // Créer un fichier téléchargeable
+            const blob = new Blob([updatedContent], { type: "text/vcard" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "miseajour_" + file.name;
+            link.click();
 
-    reader.onerror = function () {
-      Swal.fire('Erreur', 'Impossible de lire le fichier.', 'error');
-    };
+            Swal.fire(
+              "Succès",
+              "Le fichier a été mis à jour avec succès !",
+              "success"
+            );
+          };
 
-    reader.readAsText(file);
-  });
-</script>
-</body>
+          reader.onerror = function () {
+            Swal.fire("Erreur", "Impossible de lire le fichier.", "error");
+          };
+
+          reader.readAsText(file);
+        });
+    </script>
+  </body>
 </html>
